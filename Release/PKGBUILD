@@ -41,7 +41,7 @@ build() {
 }
 
 package() {
-	cmake --install ${srcdir}/build --strip
+	cmake --install ${srcdir}/build --prefix=${pkgdir}/${pkgname} --strip
 }
 
 
