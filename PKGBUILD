@@ -30,20 +30,18 @@ validpgpkeys=()
 
 prepare()
 {
-	cd $srcdir/${_realname}
+	cd ${srcdir}/${_realname}
 	git submodule update --init --recursive
 }
 
 build() {
-	mkdir build
-	cd build
-	cmake -S ../${_realname} -DBGFX_BUILD_TOOLS=OFF -DBGFX_BUILD_EXAMPLES=OFF -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$pkgdir -G"Ninja"
-	cmake --build .
+	cmake -S ${_realname} -B build \
+        	-DCMAKE_BUILD_TYPE='Release' -DBGFX_BUILD_TOOLS=OFF -DBGFX_BUILD_EXAMPLES=OFF -G"Ninja"
+	cmake --build build
 }
 
 package() {
-	cd ${pkgname}
-	cmake --install ${pkgdir} --strip
+	cmake --install ${srcdir}/build --strip
 }
 
 
