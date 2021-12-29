@@ -1,0 +1,50 @@
+# Maintainer: https://github.com/cppfever/bgfx-pkgbuild.git
+# Contributor: Alexey Oreshkov cppfever@gmail.com 
+
+_realname=bgfxd.git
+_shortcommit=
+pkgbase=mingw-w64-${_realname}
+pkgname="${MINGW_PACKAGE_PREFIX}-${_realname}"
+pkgver=1.115
+pkgrel=1
+pkgdesc="Cross-platform rendering library"
+url=https://github.com/bkaradzic/bgfx.git
+license=(BSD-2-Clause License)
+arch=('i686' 'x86_64')
+mingw_arch=('mingw32' 'mingw64' 'ucrt64' 'clang64' 'clang32')
+groups=()
+depends=()
+makedepends=("${MINGW_PACKAGE_PREFIX}-cmake" "${MINGW_PACKAGE_PREFIX}-ninja")
+checkdepends=()
+optdepends=()
+provides=()
+conflicts=()
+replaces=()
+backup=()
+options=()
+install=
+changelog=
+source=("bx::git+https://github.com/bkaradzic/bx.git"
+	"bimg::git+https://github.com/bkaradzic/bimg.git"
+	"bgfx::git+https://github.com/bkaradzic/bgfx.git")
+noextract=()
+md5sums=('SKIP' 'SKIP' 'SKIP')
+validpgpkeys=()
+
+prepare()
+{
+	cd ${srcdir}/bgfx
+	../bx/tools/bin/windows/genie --with-tools --with-combined-examples --gcc=mingw-gcc cmake
+}
+
+build() {
+	cd bgfx/.build/projects/cmake
+	cmake -B ${srcdir}/build -DCMAKE_BUILD_TYPE='Debug' -G"Ninja"
+	cmake --build ${srcdir}/build
+}
+
+package() {
+	cmake --install ${srcdir}/build --prefix=${pkgdir}/${pkgname}
+}
+
+
