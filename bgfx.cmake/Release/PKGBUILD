@@ -1,19 +1,18 @@
 # Maintainer: https://github.com/cppfever/bgfx-pkgbuild.git
 
 _realname=bgfx
-_shortcommit=417f8b8
 pkgbase=mingw-w64-${_realname}
 pkgname="${MINGW_PACKAGE_PREFIX}-${_realname}"
-pkgver=v1.115.7933
+pkgver=1.115.7933
 pkgrel=1
 pkgdesc="Cross-platform rendering library"
 url=https://github.com/bkaradzic/bgfx.cmake.git
 license=(BSD-2-Clause License)
-arch=('i686' 'x86_64')
-mingw_arch=('mingw32' 'mingw64' 'ucrt64' 'clang64' 'clang32')
+arch=('any')
+mingw_arch=('mingw64')
 groups=()
 depends=()
-makedepends=("${MINGW_PACKAGE_PREFIX}-cmake" "${MINGW_PACKAGE_PREFIX}-ninja")
+makedepends=("git" "${MINGW_PACKAGE_PREFIX}-cmake" "${MINGW_PACKAGE_PREFIX}-ninja")
 checkdepends=()
 optdepends=()
 provides=()
@@ -23,7 +22,7 @@ backup=()
 options=()
 install=
 changelog=
-source=("${_realname}::git+https://github.com/bkaradzic/bgfx.cmake.git#tag=${pkgver}-${_shortcommit}")
+source=("${_realname}::git+https://github.com/bkaradzic/bgfx.cmake.git#tag=v1.115.7933-417f8b8")
 noextract=()
 md5sums=('SKIP')
 validpgpkeys=()
@@ -35,12 +34,28 @@ prepare()
 }
 
 build() {
-	cmake -S ${_realname} -B build -DCMAKE_BUILD_TYPE='Release' -G"Ninja"
-	cmake --build build
+	mkdir -p "${srcdir}/build-${MSYSTEM}" && cd "${srcdir}/build-${MSYSTEM}"
+
+	declare -a extra_config
+	if check_option "debug" "n"; then
+		extra_config+=("-DCMAKE_BUILD_TYPE=Release")
+	else
+		extra_config+=("-DCMAKE_BUILD_TYPE=Debug")
+	fi
+
+	MSYS2_ARG_CONV_EXCL="-DCMAKE_INSTALL_PREFIX=" \
+		"${MINGW_PREFIX}"/bin/cmake.exe \
+		-GNinja \
+		-DCMAKE_INSTALL_PREFIX="${MINGW_PREFIX}" \
+		-DBGFX_BUILD_TOOLS=OFF -DBGFX_BUILD_EXAMPLES=OFF \
+		"${extra_config[@]}" \
+		-DBUILD_{SHARED,STATIC}_LIBS=ON \
+		../${_realname}
+
+		"${MINGW_PREFIX}"/bin/cmake.exe --build .
 }
 
 package() {
-	cmake --install ${srcdir}/build --prefix=${pkgdir}/${pkgname} --strip
+	cd "${srcdir}/build-${MSYSTEM}"
+	DESTDIR="${pkgdir}" "${MINGW_PREFIX}"/bin/cmake.exe --install .
 }
-
-
